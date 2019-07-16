@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.chpengzh</groupId>
+    <artifactId>template-springboot</artifactId>
+    <packaging>pom</packaging>
+    <version>latest</version>
+    <modules>
+        <module>checkstyle</module>
+        <module>app</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Dependencies -->
+        <findbugs.version>3.0.0</findbugs.version>
+        <spring.boot.version>2.1.0.RELEASE</spring.boot.version>
+
+        <!-- Maven plugins -->
+        <plugin.checkstyle.version>3.1.0</plugin.checkstyle.version>
+        <plugin.findbugs.version>3.0.3</plugin.findbugs.version>
+        <plugin.spring.boot.version>${spring.boot.version}</plugin.spring.boot.version>
+
+        <!-- Extension -->
+        <ext.archetype.packaging.version>3.1.1</ext.archetype.packaging.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- @Nonnull / @Nullable support for findbugs -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>${findbugs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${findbugs.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${plugin.spring.boot.version}</version>
+                </plugin>
+                <!--
+                    项目风格检测工具:
+                    所有项目代码均需要满足checkstyle定义风格, 否则编译过程报错;
+                -->
+                <plugin>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${plugin.checkstyle.version}</version>
+                    <executions>
+                        <execution>
+                            <id>checkstyle-verify</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <consoleOutput>true</consoleOutput>
+                                <logViolationsToConsole>true</logViolationsToConsole>
+                                <failsOnError>true</failsOnError>
+                                <failOnViolation>true</failOnViolation>
+                                <configLocation>checkstyle-configuration.xml</configLocation>
+                                <includeResources>false</includeResources>
+                                <includeTestResources>false</includeTestResources>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <!--
+                    静态检测工具:
+                    原则上Core/Facade级别代码, 需要在每一个函数参数以及返回值上标明一下两种注解之一
+                        - @javax.annotation.Nonnull
+                        - @javax.annotation.Nullable
+                    当静态检测不通过时, 构建过程报错；
+                    如果需要支持构建warning，请在报错函数或类上添加
+                        - @edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+                 -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <version>${plugin.findbugs.version}</version>
+                    <executions>
+                        <execution>
+                            <id>findbugs-verify</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <xmlOutput>true</xmlOutput>
+                                <findbugsXmlOutput>false</findbugsXmlOutput>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.archetype</groupId>
+                <artifactId>archetype-packaging</artifactId>
+                <version>${ext.archetype.packaging.version}</version>
+            </extension>
+        </extensions>
+    </build>
+</project>
